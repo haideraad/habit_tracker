@@ -531,18 +531,6 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-
-            .tabs {
-                flex-direction: column;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-
-            .input-group button {
-                width: 100%;
-            }
         }
     </style>
 </head>
@@ -553,147 +541,151 @@
             <div class="date-display" id="dateDisplay"></div>
         </div>
 
-        <div id="authSection" class="panel">
+        <div id="authSection" class="panel" style="display: block;">
             <h2>Sign In to Sync Data</h2>
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Password">
-            <button class="btn btn-primary" onclick="signIn()">Sign In</button>
-            <button class="btn btn-edit" onclick="signUp()">Sign Up</button>
-            <p>Sign in to sync across devices (free, no credit card).</p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn btn-primary" onclick="signIn()">Sign In</button>
+                <button class="btn btn-edit" onclick="signUp()">Sign Up</button>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.8em; opacity: 0.7;">Or use the app locally. Sign in to sync across devices.</p>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('today')">Today</button>
-            <button class="tab" onclick="switchTab('dashboard')">Dashboard</button>
-            <button class="tab" onclick="switchTab('habits')">Habits</button>
-            <button class="tab" onclick="switchTab('timer')">Focus Timer</button>
-            <button class="tab" onclick="switchTab('planning')">Planning</button>
-        </div>
-
-        <!-- Today Panel -->
-        <div id="today" class="panel active">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Today's Progress</div>
-                    <div class="stat-value" id="todayProgress">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Current Streak</div>
-                    <div class="stat-value" id="currentStreak">0 🔥</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Completed Today</div>
-                    <div class="stat-value" id="completedToday">0</div>
-                </div>
+        <div id="mainUI" style="display: none;">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('today')">Today</button>
+                <button class="tab" onclick="switchTab('dashboard')">Dashboard</button>
+                <button class="tab" onclick="switchTab('habits')">Habits</button>
+                <button class="tab" onclick="switchTab('timer')">Focus Timer</button>
+                <button class="tab" onclick="switchTab('planning')">Planning</button>
             </div>
 
-            <div class="progress-ring">
-                <svg width="150" height="150">
-                    <circle class="progress-ring-circle" cx="75" cy="75" r="65"></circle>
-                    <circle class="progress-ring-progress" cx="75" cy="75" r="65" id="progressCircle"></circle>
-                </svg>
-                <div class="progress-text" id="progressText">0%</div>
-            </div>
-
-            <h3>Today's Habits</h3>
-            <div class="habit-list" id="todayHabits"></div>
-
-            <h3 style="margin-top: 30px;">Today's Tasks</h3>
-            <div class="todo-list" id="todayTodos"></div>
-
-            <div id="motivationalQuote" class="motivational-quote"></div>
-        </div>
-
-        <!-- Dashboard Panel -->
-        <div id="dashboard" class="panel">
-            <h2 style="margin-bottom: 20px; color: #3498db;">📊 Analytics Dashboard</h2>
-            
-            <div class="info-box">
-                <p><strong>💡 How it works:</strong> Your habits persist permanently - they never reset! Each day at midnight, all checkboxes automatically uncheck so you can track today's progress while keeping your streak alive.</p>
-            </div>
-
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <h3>📅 Last 30 Days</h3>
-                    <div class="history-calendar" id="historyCalendar"></div>
-                    <div style="margin-top: 15px; font-size: 0.9em; color: #bdc3c7;">
-                        <span style="display: inline-block; width: 15px; height: 15px; background: #2ecc71; border-radius: 3px; margin-right: 5px;"></span> 100% Complete
-                        <span style="display: inline-block; width: 15px; height: 15px; background: #f1c40f; border-radius: 3px; margin: 0 5px 0 10px;"></span> Partial
+            <!-- Today Panel -->
+            <div id="today" class="panel active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Today's Progress</div>
+                        <div class="stat-value" id="todayProgress">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Current Streak</div>
+                        <div class="stat-value" id="currentStreak">0 🔥</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completed Today</div>
+                        <div class="stat-value" id="completedToday">0</div>
                     </div>
                 </div>
 
-                <div class="dashboard-card">
-                    <h3>📈 Weekly Progress</h3>
-                    <div class="weekly-chart" id="weeklyChart"></div>
+                <div class="progress-ring">
+                    <svg width="150" height="150">
+                        <circle class="progress-ring-circle" cx="75" cy="75" r="65"></circle>
+                        <circle class="progress-ring-progress" cx="75" cy="75" r="65" id="progressCircle"></circle>
+                    </svg>
+                    <div class="progress-text" id="progressText">0%</div>
                 </div>
 
-                <div class="dashboard-card">
-                    <h3>🏆 Top Streaks</h3>
-                    <div id="topStreaks"></div>
+                <h3>Today's Habits</h3>
+                <div class="habit-list" id="todayHabits"></div>
+
+                <h3 style="margin-top: 30px;">Today's Tasks</h3>
+                <div class="todo-list" id="todayTodos"></div>
+
+                <div id="motivationalQuote" class="motivational-quote"></div>
+            </div>
+
+            <!-- Dashboard Panel -->
+            <div id="dashboard" class="panel">
+                <h2 style="margin-bottom: 20px; color: #3498db;">📊 Analytics Dashboard</h2>
+                
+                <div class="info-box">
+                    <p><strong>💡 How it works:</strong> Your habits persist permanently - they never reset! Each day at midnight, all checkboxes automatically uncheck so you can track today's progress while keeping your streak alive.</p>
                 </div>
 
-                <div class="dashboard-card">
-                    <h3>📊 Category Breakdown</h3>
-                    <div id="categoryStats"></div>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>📅 Last 30 Days</h3>
+                        <div class="history-calendar" id="historyCalendar"></div>
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #bdc3c7;">
+                            <span style="display: inline-block; width: 15px; height: 15px; background: #2ecc71; border-radius: 3px; margin-right: 5px;"></span> 100% Complete
+                            <span style="display: inline-block; width: 15px; height: 15px; background: #f1c40f; border-radius: 3px; margin: 0 5px 0 10px;"></span> Partial
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>📈 Weekly Progress</h3>
+                        <div class="weekly-chart" id="weeklyChart"></div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>🏆 Top Streaks</h3>
+                        <div id="topStreaks"></div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>📊 Category Breakdown</h3>
+                        <div id="categoryStats"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Habits Panel -->
-        <div id="habits" class="panel">
-            <div class="info-box">
-                <p><strong>✨ Permanent Habits:</strong> Add your habits once and they stay forever! They automatically uncheck at midnight so you can track daily, but your streaks continue building.</p>
+            <!-- Habits Panel -->
+            <div id="habits" class="panel">
+                <div class="info-box">
+                    <p><strong>✨ Permanent Habits:</strong> Add your habits once and they stay forever! They automatically uncheck at midnight so you can track daily, but your streaks continue building.</p>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="habitInput" placeholder="Add a new habit...">
+                    <button class="btn btn-primary" onclick="addHabit()">Add Habit</button>
+                </div>
+
+                <div class="habit-list" id="habitList"></div>
             </div>
 
-            <div class="input-group">
-                <input type="text" id="habitInput" placeholder="Add a new habit...">
-                <button class="btn btn-primary" onclick="addHabit()">Add Habit</button>
+            <!-- Timer Panel -->
+            <div id="timer" class="panel">
+                <div class="timer-presets">
+                    <button class="preset-btn" onclick="setTimer(25)">Pomodoro (25m)</button>
+                    <button class="preset-btn" onclick="setTimer(60)">Spanish (60m)</button>
+                    <button class="preset-btn" onclick="setTimer(90)">Deep Work (90m)</button>
+                    <button class="preset-btn" onclick="setTimer(15)">English (15m)</button>
+                    <button class="preset-btn" onclick="setTimer(5)">Break (5m)</button>
+                </div>
+
+                <div class="timer-display" id="timerDisplay">25:00</div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary" onclick="startTimer()">Start</button>
+                    <button class="btn btn-edit" onclick="pauseTimer()">Pause</button>
+                    <button class="btn btn-delete" onclick="resetTimer()">Reset</button>
+                </div>
+
+                <div class="planning-section">
+                    <h3>Timer Session Notes</h3>
+                    <input type="text" id="sessionNote" placeholder="What are you working on?">
+                </div>
             </div>
 
-            <div class="habit-list" id="habitList"></div>
-        </div>
+            <!-- Planning Panel -->
+            <div id="planning" class="panel">
+                <h3>Plan Tomorrow</h3>
+                <div class="input-group">
+                    <input type="text" id="todoInput" placeholder="Add a task for tomorrow...">
+                    <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
+                </div>
 
-        <!-- Timer Panel -->
-        <div id="timer" class="panel">
-            <div class="timer-presets">
-                <button class="preset-btn" onclick="setTimer(25)">Pomodoro (25m)</button>
-                <button class="preset-btn" onclick="setTimer(60)">Spanish (60m)</button>
-                <button class="preset-btn" onclick="setTimer(90)">Deep Work (90m)</button>
-                <button class="preset-btn" onclick="setTimer(15)">English (15m)</button>
-                <button class="preset-btn" onclick="setTimer(5)">Break (5m)</button>
-            </div>
+                <div class="todo-list" id="planningList"></div>
 
-            <div class="timer-display" id="timerDisplay">25:00</div>
-
-            <div class="timer-controls">
-                <button class="btn btn-primary" onclick="startTimer()">Start</button>
-                <button class="btn btn-edit" onclick="pauseTimer()">Pause</button>
-                <button class="btn btn-delete" onclick="resetTimer()">Reset</button>
-            </div>
-
-            <div class="planning-section">
-                <h3>Timer Session Notes</h3>
-                <input type="text" id="sessionNote" placeholder="What are you working on?">
-            </div>
-        </div>
-
-        <!-- Planning Panel -->
-        <div id="planning" class="panel">
-            <h3>Plan Tomorrow</h3>
-            <div class="input-group">
-                <input type="text" id="todoInput" placeholder="Add a task for tomorrow...">
-                <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
-            </div>
-
-            <div class="todo-list" id="planningList"></div>
-
-            <div class="planning-section" style="margin-top: 30px;">
-                <h3>Nightly Review</h3>
-                <p>What went well today?</p>
-                <input type="text" id="reviewWin" placeholder="Today's win..." style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #7f8c8d; border-radius: 8px; background: #2c3e50; color: #f0f0f0;">
-                <p>What can improve tomorrow?</p>
-                <input type="text" id="reviewImprove" placeholder="Tomorrow's focus..." style="width: 100%; padding: 10px; border: 2px solid #7f8c8d; border-radius: 8px; background: #2c3e50; color: #f0f0f0;">
-                <button class="btn btn-primary" onclick="saveReview()" style="margin-top: 10px;">Save Review</button>
+                <div class="planning-section" style="margin-top: 30px;">
+                    <h3>Nightly Review</h3>
+                    <p>What went well today?</p>
+                    <input type="text" id="reviewWin" placeholder="Today's win..." style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #7f8c8d; border-radius: 8px; background: #2c3e50; color: #f0f0f0;">
+                    <p>What can improve tomorrow?</p>
+                    <input type="text" id="reviewImprove" placeholder="Tomorrow's focus..." style="width: 100%; padding: 10px; border: 2px solid #7f8c8d; border-radius: 8px; background: #2c3e50; color: #f0f0f0;">
+                    <button class="btn btn-primary" onclick="saveReview()" style="margin-top: 10px;">Save Review</button>
+                </div>
             </div>
         </div>
     </div>
@@ -720,10 +712,11 @@
     </div>
 
     <script>
-        // Supabase Setup
+        // Supabase Initialization
         const supabaseUrl = 'https://wbcjkwgwiozdgzbhdtak.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2prd2d3aW96ZGd6YmhkdGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwOTM2ODAsImV4cCI6MjA4MjY2OTY4MH0.8KdYmmmIV_8qCML6rNRhvKMUbLh1YgOjFUySDLbaFDI';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         let habits = [];
         let todos = [];
@@ -735,7 +728,6 @@
         let editingHabitId = null;
         let lastResetDate = null;
         let points = 0;
-        let currentUser = null;
 
         const circumference = 2 * Math.PI * 65;
         const motivationalQuotes = [
@@ -746,44 +738,36 @@
             "You're one habit away from transforming your life."
         ];
 
-        // Auth Functions
         async function signUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else alert('Check your email for confirmation link!');
+            const { error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) alert(error.message); else alert('Check your email for confirmation!');
         }
 
         async function signIn() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) alert(error.message);
         }
 
-        async function signOut() {
-            const { error } = await supabase.auth.signOut();
-            if (error) alert(error.message);
+        async function handleSignOut() {
+            await supabaseClient.auth.signOut();
             location.reload();
         }
 
-        supabase.auth.onAuthStateChange(async (event, session) => {
+        // Listen for Auth State
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session) {
-                currentUser = session.user;
                 document.getElementById('authSection').style.display = 'none';
-                document.querySelector('.tabs').style.display = 'flex';
-                await loadData();
+                document.getElementById('mainUI').style.display = 'block';
                 init();
-            } else {
-                currentUser = null;
-                document.getElementById('authSection').style.display = 'block';
-                document.querySelector('.tabs').style.display = 'none';
-                document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
             }
         });
 
-        async function init() {
+        function init() {
+            loadData();
             updateDateDisplay();
             checkAndResetDaily();
             renderHabits();
@@ -792,81 +776,33 @@
             renderDashboard();
             updateProgressRing(0);
             showMotivationalQuote();
-            setupRealtime();
         }
 
-        async function loadData() {
-            if (!currentUser) return;
-
-            // Load habits
-            const { data: habitsData } = await supabase
-                .from('habits')
-                .select('*')
-                .eq('user_id', currentUser.id);
-            habits = habitsData || [];
-
-            // Load todos
-            const { data: todosData } = await supabase
-                .from('todos')
-                .select('*')
-                .eq('user_id', currentUser.id);
-            todos = todosData || [];
-
-            // Load user_data (completions, points, reviews)
-            const { data: userData } = await supabase
-                .from('user_data')
-                .select('completions, points, reviews')
-                .eq('user_id', currentUser.id)
-                .single();
-            if (userData) {
-                completions = userData.completions || {};
-                points = userData.points || 0;
-                reviews = userData.reviews || {};
-            } else {
-                // Create if not exists
-                await supabase.from('user_data').insert({ user_id: currentUser.id, completions: {}, points: 0, reviews: {} });
-            }
+        function loadData() {
+            habits = JSON.parse(localStorage.getItem('habits')) || [];
+            todos = JSON.parse(localStorage.getItem('todos')) || [];
+            completions = JSON.parse(localStorage.getItem('completions')) || {};
+            reviews = JSON.parse(localStorage.getItem('reviews')) || {};
+            points = parseInt(localStorage.getItem('points')) || 0;
+            lastResetDate = localStorage.getItem('lastResetDate');
         }
 
-        async function saveUserData() {
-            if (!currentUser) return;
-            await supabase
-                .from('user_data')
-                .upsert({ user_id: currentUser.id, completions, points, reviews });
-        }
-
-        function setupRealtime() {
-            supabase.channel('habits')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'habits' }, async () => {
-                    await loadData();
-                    renderHabits();
-                    renderTodayView();
-                    renderDashboard();
-                })
-                .subscribe();
-
-            supabase.channel('todos')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, async () => {
-                    await loadData();
-                    renderPlanning();
-                    renderTodayView();
-                })
-                .subscribe();
-
-            supabase.channel('user_data')
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user_data', filter: `user_id=eq.${currentUser.id}` }, async () => {
-                    await loadData();
-                    renderDashboard();
-                    updateStats();
-                })
-                .subscribe();
+        function saveData() {
+            localStorage.setItem('habits', JSON.stringify(habits));
+            localStorage.setItem('todos', JSON.stringify(todos));
+            localStorage.setItem('completions', JSON.stringify(completions));
+            localStorage.setItem('reviews', JSON.stringify(reviews));
+            localStorage.setItem('points', points);
+            localStorage.setItem('lastResetDate', lastResetDate);
         }
 
         function checkAndResetDaily() {
             const today = getToday();
             
             if (lastResetDate !== today) {
-                if (!completions[today]) completions[today] = {};
+                if (!completions[today]) {
+                    completions[today] = {};
+                }
                 
                 const yesterday = getYesterday();
                 habits.forEach(habit => {
@@ -885,7 +821,7 @@
                 });
                 
                 lastResetDate = today;
-                saveUserData();
+                saveData();
             }
         }
 
@@ -924,27 +860,24 @@
             }
         }
 
-        async function addHabit() {
+        function addHabit() {
             const input = document.getElementById('habitInput');
             const name = input.value.trim();
             if (!name) return;
 
-            const newHabit = {
-                user_id: currentUser.id,
+            habits.push({
+                id: Date.now(),
                 name: name,
                 category: 'mental',
                 streak: 0,
                 longestStreak: 0,
                 lastCompleted: null
-            };
-
-            const { data, error } = await supabase.from('habits').insert(newHabit).select();
-            if (error) alert(error.message);
-            else habits.push(data[0]);
+            });
 
             input.value = '';
             renderHabits();
             renderTodayView();
+            saveData();
         }
 
         function renderHabits() {
@@ -962,8 +895,8 @@
                         </div>
                     </div>
                     <div class="habit-actions">
-                        <button class="btn btn-edit" onclick="editHabit('${habit.id}')">Edit</button>
-                        <button class="btn btn-delete" onclick="deleteHabit('${habit.id}')">Delete</button>
+                        <button class="btn btn-edit" onclick="editHabit(${habit.id})">Edit</button>
+                        <button class="btn btn-delete" onclick="deleteHabit(${habit.id})">Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -980,7 +913,7 @@
                     <div class="habit-item ${isCompleted ? 'completed' : ''}">
                         <input type="checkbox" class="habit-checkbox" 
                             ${isCompleted ? 'checked' : ''} 
-                            onchange="toggleHabit('${habit.id}', this)">
+                            onchange="toggleHabit(${habit.id}, this)">
                         <div class="habit-info">
                             <div class="habit-name">${habit.name}</div>
                             <div class="habit-streak">
@@ -996,26 +929,25 @@
                 <div class="todo-item ${todo.completed ? 'completed' : ''}">
                     <input type="checkbox" class="habit-checkbox" 
                         ${todo.completed ? 'checked' : ''} 
-                        onchange="toggleTodo('${todo.id}', this)">
+                        onchange="toggleTodo(${todo.id}, this)">
                     <div class="habit-info">
                         <div class="habit-name">${todo.text}</div>
                     </div>
-                    <button class="btn btn-delete" onclick="deleteTodo('${todo.id}')">Delete</button>
+                    <button class="btn btn-delete" onclick="deleteTodo(${todo.id})">Delete</button>
                 </div>
             `).join('');
 
             updateStats();
         }
 
-        async function toggleHabit(habitId, checkbox) {
+        function toggleHabit(habitId, checkbox) {
             const today = getToday();
             if (!completions[today]) completions[today] = {};
             
             const isCompleted = checkbox.checked;
             completions[today][habitId] = isCompleted;
             
-            const habitIndex = habits.findIndex(h => h.id === habitId);
-            const habit = habits[habitIndex];
+            const habit = habits.find(h => h.id === habitId);
             if (isCompleted) {
                 points += 10;
                 if (habit.lastCompleted === getYesterday() || habit.streak === 0) {
@@ -1033,20 +965,15 @@
                     habit.lastCompleted = getYesterday();
                 }
             }
-            habits[habitIndex] = habit;
 
-            const { error } = await supabase.from('habits').update(habit).eq('id', habitId);
-            if (error) alert(error.message);
-
-            await saveUserData();
             renderTodayView();
             renderHabits();
             renderDashboard();
+            saveData();
         }
 
-        async function toggleTodo(todoId, checkbox) {
-            const todoIndex = todos.findIndex(t => t.id === todoId);
-            const todo = todos[todoIndex];
+        function toggleTodo(todoId, checkbox) {
+            const todo = todos.find(t => t.id === todoId);
             if (todo) {
                 todo.completed = checkbox.checked;
                 if (todo.completed) {
@@ -1055,14 +982,9 @@
                 } else {
                     points = Math.max(0, points - 3);
                 }
-                todos[todoIndex] = todo;
-
-                const { error } = await supabase.from('todos').update(todo).eq('id', todoId);
-                if (error) alert(error.message);
-
-                await saveUserData();
                 renderTodayView();
                 renderPlanning();
+                saveData();
             }
         }
 
@@ -1214,22 +1136,18 @@
             document.getElementById('editModal').classList.add('active');
         }
 
-        async function saveEdit() {
-            const habitIndex = habits.findIndex(h => h.id === editingHabitId);
-            const habit = habits[habitIndex];
+        function saveEdit() {
+            const habit = habits.find(h => h.id === editingHabitId);
             if (!habit) return;
 
             habit.name = document.getElementById('editHabitName').value;
             habit.category = document.getElementById('editHabitCategory').value;
-            habits[habitIndex] = habit;
-
-            const { error } = await supabase.from('habits').update(habit).eq('id', editingHabitId);
-            if (error) alert(error.message);
 
             closeModal();
             renderHabits();
             renderTodayView();
             renderDashboard();
+            saveData();
         }
 
         function closeModal() {
@@ -1237,7 +1155,7 @@
             editingHabitId = null;
         }
 
-        async function deleteHabit(habitId) {
+        function deleteHabit(habitId) {
             if (!confirm('Delete this habit? This will remove all historical data for this habit.')) return;
             habits = habits.filter(h => h.id !== habitId);
             
@@ -1245,33 +1163,27 @@
                 delete completions[date][habitId];
             });
             
-            const { error } = await supabase.from('habits').delete().eq('id', habitId);
-            if (error) alert(error.message);
-
-            await saveUserData();
             renderHabits();
             renderTodayView();
             renderDashboard();
+            saveData();
         }
 
-        async function addTodo() {
+        function addTodo() {
             const input = document.getElementById('todoInput');
             const text = input.value.trim();
             if (!text) return;
 
-            const newTodo = {
-                user_id: currentUser.id,
+            todos.push({
+                id: Date.now(),
                 text: text,
                 completed: false
-            };
-
-            const { data, error } = await supabase.from('todos').insert(newTodo).select();
-            if (error) alert(error.message);
-            else todos.push(data[0]);
+            });
 
             input.value = '';
             renderPlanning();
             renderTodayView();
+            saveData();
         }
 
         function renderPlanning() {
@@ -1280,36 +1192,33 @@
                 <div class="todo-item ${todo.completed ? 'completed' : ''}">
                     <input type="checkbox" class="habit-checkbox" 
                         ${todo.completed ? 'checked' : ''} 
-                        onchange="toggleTodo('${todo.id}', this)">
+                        onchange="toggleTodo(${todo.id}, this)">
                     <div class="habit-info">
                         <div class="habit-name">${todo.text}</div>
                     </div>
-                    <button class="btn btn-delete" onclick="deleteTodo('${todo.id}')">Delete</button>
+                    <button class="btn btn-delete" onclick="deleteTodo(${todo.id})">Delete</button>
                 </div>
             `).join('');
         }
 
-        async function deleteTodo(todoId) {
+        function deleteTodo(todoId) {
             todos = todos.filter(t => t.id !== todoId);
-
-            const { error } = await supabase.from('todos').delete().eq('id', todoId);
-            if (error) alert(error.message);
-
             renderPlanning();
             renderTodayView();
+            saveData();
         }
 
-        async function saveReview() {
+        function saveReview() {
             const today = getToday();
             const win = document.getElementById('reviewWin').value.trim();
             const improve = document.getElementById('reviewImprove').value.trim();
             
             if (win || improve) {
                 reviews[today] = { win, improve };
-                await saveUserData();
-                alert('Review saved! Keep building momentum! 🚀');
+                alert('Review saved! Reflect and conquer tomorrow! 🌟');
                 document.getElementById('reviewWin').value = '';
                 document.getElementById('reviewImprove').value = '';
+                saveData();
             }
         }
 
@@ -1337,9 +1246,9 @@
                 
                 if (timerSeconds <= 0) {
                     pauseTimer();
-                    alert('Timer complete! Great work! 🎉');
+                    alert('Timer complete! Great session! 🎉 +20 points');
                     points += 20;
-                    saveUserData();
+                    saveData();
                     timerSeconds = 1500;
                     updateTimerDisplay();
                 }
@@ -1369,10 +1278,16 @@
         // Check for new day every minute
         setInterval(checkAndResetDaily, 60000);
 
-        // Initial check
-        supabase.auth.getSession().then(({ data }) => {
-            if (data.session) init();
-        });
+        // Initial setup
+        window.onload = () => {
+            supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('mainUI').style.display = 'block';
+                    init();
+                }
+            });
+        };
     </script>
 </body>
 </html>

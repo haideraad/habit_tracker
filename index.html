@@ -545,10 +545,8 @@
             <h2>Sign In to Sync Data</h2>
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Password">
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn btn-primary" onclick="signIn()">Sign In</button>
-                <button class="btn btn-edit" onclick="signUp()">Sign Up</button>
-            </div>
+            <button class="btn btn-primary" onclick="signIn()">Sign In</button>
+            <button class="btn btn-edit" onclick="signUp()">Sign Up</button>
             <p style="margin-top: 15px; font-size: 0.8em; opacity: 0.7;">Or use the app locally. Sign in to sync across devices.</p>
         </div>
 
@@ -559,6 +557,7 @@
                 <button class="tab" onclick="switchTab('habits')">Habits</button>
                 <button class="tab" onclick="switchTab('timer')">Focus Timer</button>
                 <button class="tab" onclick="switchTab('planning')">Planning</button>
+                <button class="btn btn-delete" onclick="handleSignOut()" style="margin-left: auto;">Logout</button>
             </div>
 
             <!-- Today Panel -->
@@ -712,11 +711,9 @@
     </div>
 
     <script>
-        // Supabase Initialization
         const supabaseUrl = 'https://wbcjkwgwiozdgzbhdtak.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY2prd2d3aW96ZGd6YmhkdGFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwOTM2ODAsImV4cCI6MjA4MjY2OTY4MH0.8KdYmmmIV_8qCML6rNRhvKMUbLh1YgOjFUySDLbaFDI';
-        
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let habits = [];
         let todos = [];
@@ -728,6 +725,7 @@
         let editingHabitId = null;
         let lastResetDate = null;
         let points = 0;
+        let currentUser = null;
 
         const circumference = 2 * Math.PI * 65;
         const motivationalQuotes = [
@@ -738,36 +736,55 @@
             "You're one habit away from transforming your life."
         ];
 
+        supabase.auth.onAuthStateChange((event, session) => {
+            currentUser = session?.user || null;
+            if (currentUser) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('mainUI').style.display = 'block';
+                loadData();
+            } else {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('mainUI').style.display = 'none';
+            }
+        });
+
         async function signUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) alert(error.message); else alert('Check your email for confirmation!');
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else alert('Check your email for confirmation link!');
         }
 
         async function signIn() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) alert(error.message);
         }
 
         async function handleSignOut() {
-            await supabaseClient.auth.signOut();
-            location.reload();
+            await supabase.auth.signOut();
         }
 
-        // Listen for Auth State
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('mainUI').style.display = 'block';
-                init();
-            }
-        });
+        async function loadData() {
+            const userId = currentUser.id;
+            const { data: habitData } = await supabase.from('habits').select('*').eq('user_id', userId);
+            habits = habitData || [];
 
-        function init() {
-            loadData();
+            const { data: todoData } = await supabase.from('todos').select('*').eq('user_id', userId);
+            todos = todoData || [];
+
+            const { data: userData } = await supabase.from('user_data').select('completions, points, reviews').eq('user_id', userId).single();
+            if (userData) {
+                completions = userData.completions || {};
+                points = userData.points || 0;
+                reviews = userData.reviews || {};
+            } else {
+                // Create if not exists
+                await supabase.from('user_data').insert({ user_id: userId, completions: {}, points: 0, reviews: {} });
+            }
+
             updateDateDisplay();
             checkAndResetDaily();
             renderHabits();
@@ -778,51 +795,9 @@
             showMotivationalQuote();
         }
 
-        function loadData() {
-            habits = JSON.parse(localStorage.getItem('habits')) || [];
-            todos = JSON.parse(localStorage.getItem('todos')) || [];
-            completions = JSON.parse(localStorage.getItem('completions')) || {};
-            reviews = JSON.parse(localStorage.getItem('reviews')) || {};
-            points = parseInt(localStorage.getItem('points')) || 0;
-            lastResetDate = localStorage.getItem('lastResetDate');
-        }
-
-        function saveData() {
-            localStorage.setItem('habits', JSON.stringify(habits));
-            localStorage.setItem('todos', JSON.stringify(todos));
-            localStorage.setItem('completions', JSON.stringify(completions));
-            localStorage.setItem('reviews', JSON.stringify(reviews));
-            localStorage.setItem('points', points);
-            localStorage.setItem('lastResetDate', lastResetDate);
-        }
-
-        function checkAndResetDaily() {
-            const today = getToday();
-            
-            if (lastResetDate !== today) {
-                if (!completions[today]) {
-                    completions[today] = {};
-                }
-                
-                const yesterday = getYesterday();
-                habits.forEach(habit => {
-                    const completedYesterday = completions[yesterday] && completions[yesterday][habit.id];
-                    if (completedYesterday) {
-                        if (habit.lastCompleted !== yesterday) {
-                            habit.streak++;
-                            habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
-                            habit.lastCompleted = yesterday;
-                        }
-                    } else {
-                        if (habit.lastCompleted && habit.lastCompleted !== today) {
-                            habit.streak = 0;
-                        }
-                    }
-                });
-                
-                lastResetDate = today;
-                saveData();
-            }
+        async function saveUserData() {
+            const userId = currentUser.id;
+            await supabase.from('user_data').update({ completions, points, reviews }).eq('user_id', userId);
         }
 
         function updateDateDisplay() {
@@ -847,6 +822,33 @@
             return date.toISOString().split('T')[0];
         }
 
+        async function checkAndResetDaily() {
+            const today = getToday();
+            
+            if (lastResetDate !== today) {
+                if (!completions[today]) completions[today] = {};
+                
+                const yesterday = getYesterday();
+                habits.forEach(habit => {
+                    const completedYesterday = completions[yesterday]?.[habit.id];
+                    if (completedYesterday) {
+                        if (habit.lastCompleted !== yesterday) {
+                            habit.streak++;
+                            habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
+                            habit.lastCompleted = yesterday;
+                        }
+                    } else {
+                        if (habit.lastCompleted && habit.lastCompleted !== today) {
+                            habit.streak = 0;
+                        }
+                    }
+                });
+                
+                lastResetDate = today;
+                await saveUserData();
+            }
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
@@ -860,24 +862,28 @@
             }
         }
 
-        function addHabit() {
+        async function addHabit() {
             const input = document.getElementById('habitInput');
             const name = input.value.trim();
             if (!name) return;
 
-            habits.push({
-                id: Date.now(),
+            const newHabit = {
+                user_id: currentUser.id,
                 name: name,
                 category: 'mental',
                 streak: 0,
                 longestStreak: 0,
                 lastCompleted: null
-            });
+            };
 
-            input.value = '';
-            renderHabits();
-            renderTodayView();
-            saveData();
+            const { data, error } = await supabase.from('habits').insert(newHabit).select();
+            if (error) alert(error.message);
+            else {
+                habits.push(data[0]);
+                input.value = '';
+                renderHabits();
+                renderTodayView();
+            }
         }
 
         function renderHabits() {
@@ -895,8 +901,8 @@
                         </div>
                     </div>
                     <div class="habit-actions">
-                        <button class="btn btn-edit" onclick="editHabit(${habit.id})">Edit</button>
-                        <button class="btn btn-delete" onclick="deleteHabit(${habit.id})">Delete</button>
+                        <button class="btn btn-edit" onclick="editHabit('${habit.id}')">Edit</button>
+                        <button class="btn btn-delete" onclick="deleteHabit('${habit.id}')">Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -913,7 +919,7 @@
                     <div class="habit-item ${isCompleted ? 'completed' : ''}">
                         <input type="checkbox" class="habit-checkbox" 
                             ${isCompleted ? 'checked' : ''} 
-                            onchange="toggleHabit(${habit.id}, this)">
+                            onchange="toggleHabit('${habit.id}', this)">
                         <div class="habit-info">
                             <div class="habit-name">${habit.name}</div>
                             <div class="habit-streak">
@@ -929,63 +935,70 @@
                 <div class="todo-item ${todo.completed ? 'completed' : ''}">
                     <input type="checkbox" class="habit-checkbox" 
                         ${todo.completed ? 'checked' : ''} 
-                        onchange="toggleTodo(${todo.id}, this)">
+                        onchange="toggleTodo('${todo.id}', this)">
                     <div class="habit-info">
                         <div class="habit-name">${todo.text}</div>
                     </div>
-                    <button class="btn btn-delete" onclick="deleteTodo(${todo.id})">Delete</button>
+                    <button class="btn btn-delete" onclick="deleteTodo('${todo.id}')">Delete</button>
                 </div>
             `).join('');
 
             updateStats();
         }
 
-        function toggleHabit(habitId, checkbox) {
+        async function toggleHabit(habitId, checkbox) {
             const today = getToday();
             if (!completions[today]) completions[today] = {};
             
             const isCompleted = checkbox.checked;
             completions[today][habitId] = isCompleted;
             
-            const habit = habits.find(h => h.id === habitId);
+            const habitIndex = habits.findIndex(h => h.id === habitId);
+            if (habitIndex === -1) return;
+
             if (isCompleted) {
                 points += 10;
-                if (habit.lastCompleted === getYesterday() || habit.streak === 0) {
-                    habit.streak++;
+                if (habits[habitIndex].lastCompleted === getYesterday() || habits[habitIndex].streak === 0) {
+                    habits[habitIndex].streak++;
                 } else {
-                    habit.streak = 1;
+                    habits[habitIndex].streak = 1;
                 }
-                habit.lastCompleted = today;
-                habit.longestStreak = Math.max(habit.longestStreak, habit.streak);
+                habits[habitIndex].lastCompleted = today;
+                habits[habitIndex].longestStreak = Math.max(habits[habitIndex].longestStreak, habits[habitIndex].streak);
                 showMotivationalQuote();
             } else {
                 points = Math.max(0, points - 5);
-                if (habit.lastCompleted === today) {
-                    habit.streak = Math.max(0, habit.streak - 1);
-                    habit.lastCompleted = getYesterday();
+                if (habits[habitIndex].lastCompleted === today) {
+                    habits[habitIndex].streak = Math.max(0, habits[habitIndex].streak - 1);
+                    habits[habitIndex].lastCompleted = getYesterday();
                 }
             }
+
+            await supabase.from('habits').update(habits[habitIndex]).eq('id', habitId);
+            await saveUserData();
 
             renderTodayView();
             renderHabits();
             renderDashboard();
-            saveData();
         }
 
-        function toggleTodo(todoId, checkbox) {
-            const todo = todos.find(t => t.id === todoId);
-            if (todo) {
-                todo.completed = checkbox.checked;
-                if (todo.completed) {
-                    points += 5;
-                    showMotivationalQuote();
-                } else {
-                    points = Math.max(0, points - 3);
-                }
-                renderTodayView();
-                renderPlanning();
-                saveData();
+        async function toggleTodo(todoId, checkbox) {
+            const todoIndex = todos.findIndex(t => t.id === todoId);
+            if (todoIndex === -1) return;
+
+            todos[todoIndex].completed = checkbox.checked;
+            if (todos[todoIndex].completed) {
+                points += 5;
+                showMotivationalQuote();
+            } else {
+                points = Math.max(0, points - 3);
             }
+
+            await supabase.from('todos').update(todos[todoIndex]).eq('id', todoId);
+            await saveUserData();
+
+            renderTodayView();
+            renderPlanning();
         }
 
         function updateStats() {
@@ -1136,18 +1149,19 @@
             document.getElementById('editModal').classList.add('active');
         }
 
-        function saveEdit() {
-            const habit = habits.find(h => h.id === editingHabitId);
-            if (!habit) return;
+        async function saveEdit() {
+            const habitIndex = habits.findIndex(h => h.id === editingHabitId);
+            if (habitIndex === -1) return;
 
-            habit.name = document.getElementById('editHabitName').value;
-            habit.category = document.getElementById('editHabitCategory').value;
+            habits[habitIndex].name = document.getElementById('editHabitName').value;
+            habits[habitIndex].category = document.getElementById('editHabitCategory').value;
+
+            await supabase.from('habits').update(habits[habitIndex]).eq('id', editingHabitId);
 
             closeModal();
             renderHabits();
             renderTodayView();
             renderDashboard();
-            saveData();
         }
 
         function closeModal() {
@@ -1155,7 +1169,7 @@
             editingHabitId = null;
         }
 
-        function deleteHabit(habitId) {
+        async function deleteHabit(habitId) {
             if (!confirm('Delete this habit? This will remove all historical data for this habit.')) return;
             habits = habits.filter(h => h.id !== habitId);
             
@@ -1163,27 +1177,33 @@
                 delete completions[date][habitId];
             });
             
+            await supabase.from('habits').delete().eq('id', habitId);
+            await saveUserData();
+
             renderHabits();
             renderTodayView();
             renderDashboard();
-            saveData();
         }
 
-        function addTodo() {
+        async function addTodo() {
             const input = document.getElementById('todoInput');
             const text = input.value.trim();
             if (!text) return;
 
-            todos.push({
-                id: Date.now(),
+            const newTodo = {
+                user_id: currentUser.id,
                 text: text,
                 completed: false
-            });
+            };
 
-            input.value = '';
-            renderPlanning();
-            renderTodayView();
-            saveData();
+            const { data, error } = await supabase.from('todos').insert(newTodo).select();
+            if (error) alert(error.message);
+            else {
+                todos.push(data[0]);
+                input.value = '';
+                renderPlanning();
+                renderTodayView();
+            }
         }
 
         function renderPlanning() {
@@ -1192,33 +1212,33 @@
                 <div class="todo-item ${todo.completed ? 'completed' : ''}">
                     <input type="checkbox" class="habit-checkbox" 
                         ${todo.completed ? 'checked' : ''} 
-                        onchange="toggleTodo(${todo.id}, this)">
+                        onchange="toggleTodo('${todo.id}', this)">
                     <div class="habit-info">
                         <div class="habit-name">${todo.text}</div>
                     </div>
-                    <button class="btn btn-delete" onclick="deleteTodo(${todo.id})">Delete</button>
+                    <button class="btn btn-delete" onclick="deleteTodo('${todo.id}')">Delete</button>
                 </div>
             `).join('');
         }
 
-        function deleteTodo(todoId) {
+        async function deleteTodo(todoId) {
             todos = todos.filter(t => t.id !== todoId);
+            await supabase.from('todos').delete().eq('id', todoId);
             renderPlanning();
             renderTodayView();
-            saveData();
         }
 
-        function saveReview() {
+        async function saveReview() {
             const today = getToday();
             const win = document.getElementById('reviewWin').value.trim();
             const improve = document.getElementById('reviewImprove').value.trim();
             
             if (win || improve) {
                 reviews[today] = { win, improve };
+                await saveUserData();
                 alert('Review saved! Reflect and conquer tomorrow! 🌟');
                 document.getElementById('reviewWin').value = '';
                 document.getElementById('reviewImprove').value = '';
-                saveData();
             }
         }
 
@@ -1248,7 +1268,7 @@
                     pauseTimer();
                     alert('Timer complete! Great session! 🎉 +20 points');
                     points += 20;
-                    saveData();
+                    saveUserData();
                     timerSeconds = 1500;
                     updateTimerDisplay();
                 }
@@ -1278,16 +1298,10 @@
         // Check for new day every minute
         setInterval(checkAndResetDaily, 60000);
 
-        // Initial setup
-        window.onload = () => {
-            supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    document.getElementById('authSection').style.display = 'none';
-                    document.getElementById('mainUI').style.display = 'block';
-                    init();
-                }
-            });
-        };
+        // Initial check
+        supabase.auth.getSession().then(({ data }) => {
+            if (data.session) loadData();
+        });
     </script>
 </body>
 </html>
